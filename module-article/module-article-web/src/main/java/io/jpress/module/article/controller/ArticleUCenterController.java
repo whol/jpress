@@ -18,6 +18,7 @@ package io.jpress.module.article.controller;
 import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.Model;
 import com.jfinal.plugin.activerecord.Page;
+import io.jboot.utils.StrUtils;
 import io.jboot.web.controller.annotation.RequestMapping;
 import io.jboot.web.controller.validate.EmptyValidate;
 import io.jboot.web.controller.validate.Form;
@@ -159,7 +160,7 @@ public class ArticleUCenterController extends UcenterControllerBase {
     public void doWriteSave() {
 
         Article article = getModel(Article.class, "article");
-        article.keep("id", "title", "content", "slug", "edit_mode", "summary", "thumbnail", "meta_keywords", "meta_description");
+        article.keep("id", "title", "content", "slug", "edit_mode", "summary", "thumbnail", "meta_keywords", "meta_description", "user_id");
 
         if (articleService.isOwn(article, getLoginedUser().getId()) == false) {
             renderJson(Ret.fail().set("message", "非法操作"));
@@ -167,14 +168,16 @@ public class ArticleUCenterController extends UcenterControllerBase {
         }
 
         if (!validateSlug(article)) {
-            renderJson(Ret.fail("message", "slug不能包含该字符：- "));
+            renderJson(Ret.fail("message", "slug不能全是数字且不能包含字符：- "));
             return;
         }
 
-        Article slugArticle = articleService.findFirstBySlug(article.getSlug());
-        if (slugArticle != null && slugArticle.getId().equals(article.getId()) == false) {
-            renderJson(Ret.fail("message", "该slug已经存在"));
-            return;
+        if (StrUtils.isNotBlank(article.getSlug())) {
+            Article slugArticle = articleService.findFirstBySlug(article.getSlug());
+            if (slugArticle != null && slugArticle.getId().equals(article.getId()) == false) {
+                renderJson(Ret.fail("message", "该slug已经存在"));
+                return;
+            }
         }
 
         //只保留的基本的html，其他的html比如<script>将会被清除
