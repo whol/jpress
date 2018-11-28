@@ -1,0 +1,125 @@
+#include("layout.html")
+#@layout(true)
+#define content()
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9">
+                <!-- 显式指定每页显示条数，如果首页需要分页显示，要与首页中的一致 -->
+                #articlePage(pageSize=10)
+                #for(article : articlePage.list)
+                <div class="blog-main">
+                    <div class="heading-blog">
+                        <a href="#(article.url ??)">
+                            #(article.title ??)
+                        </a>
+                    </div>
+                    <a href="#(article.url ??)">
+                        <img src="#(article.firstImage ??)" class="img-responsive img-rounded" />
+                    </a>
+                    <div class="blog-info">
+                        <span class="label label-primary"><i class="fa fa-clock-o"></i> #date(article.created)</span>
+                        <span class="label label-success">
+								#articleCategories(article.id,"category")
+									#for(category : categories)
+										<a href="#(category.url ??)" class="label" target="_blank">#(category.title ??)</a>#if(!for.last) , #end#end#end</span>
+                        <span class="label label-danger">#(article.user.nickname)</span>
+                        <span class="label label-info"><i class="fa fa-eye"></i> #(article.view_count) <i class="fa fa-comment-o"></i> #(article.comment_count)
+								</span>
+                    </div>
+                    <div class="blog-txt">
+                        #maxLength(article.text,100)
+                    </div>
+                </div>
+                #end
+                <!--BLOG ONE END -->
+                #articlePaginate()
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center ">
+                        #for(page : pages)
+                        <li class="page-item #(page.style ??)">
+                            <a class="page-link" href="#(page.url ??)">
+                                #(page.text ??)
+                            </a>
+                        </li>
+                        #end
+                    </ul>
+                </nav>
+                #end
+                <!-- PAGING END -->
+                #end
+            </div>
+            <div class="col-md-3">
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>我的专栏</strong>
+                    </li>
+                    #tags(orderBy="count desc",count=5)
+                    #for(tag : tags)
+                    <li class="list-group-item">
+                        <span class="badge">#(tag.count)</span>
+                        <a href="#(tag.url)">#(tag.title)</a>
+                    </li>
+                    #end
+                    #end
+                    <li class="list-group-item">
+                        <strong>TOP 5 文章</strong>
+                    </li>
+                    #articles(orderBy="view_count desc",count=5)
+                    #for(article : articles)
+                    <li class="list-group-item">
+                        <span class="badge">#(article.viewCount)</span>
+                        <a href="#(article.url)">#(article.title)</a>
+                    </li>
+                    #end
+                    #end
+                    <li class="list-group-item">
+                        <strong>NEW 5 文章</strong>
+                    </li>
+                    #articles(orderBy="created desc",count=5)
+                    #for(article : articles)
+                    <li class="list-group-item">
+                        <span class="badge">#(article.viewCount)</span>
+                        <a href="#(article.url)">#(article.title)</a>
+                    </li>
+                    #end
+                    #end
+                </ul>
+                <br />
+
+                <ul class="list-group">
+                    <li class="list-group-item">Advrtisements
+                    </li>
+                    <li class="list-group-item">
+                        <a href="#">
+                            <img src="assets/img/ad1.jpg" class="img-responsive" />
+                        </a>
+                        <br />
+                        <a href="#">
+                            <img src="assets/img/ad2.jpg" class="img-responsive" />
+                        </a>
+                    </li>
+                </ul>
+
+                <br />
+                <!--<div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Subscribe For Updates</h3>
+                        </div>
+                        <div class="panel-body">
+                            <input type="text" class="form-control" placeholder="Your Email" />
+                            <hr />
+                            <a href="#" class="btn btn-info btn-sm btn-block">subscribe</a>
+                        </div>
+                    </div>
+                </div>-->
+            </div>
+
+
+
+        </div>
+    </div>
+</section>
+#end
