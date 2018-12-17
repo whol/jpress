@@ -32,12 +32,6 @@ public class IndexController extends TemplateControllerBase {
 
     public void index() {
 
-        //JPress 没有安装，先进行安装
-        if (InstallController.isInstalled() == false) {
-            redirect("/install");
-            return;
-        }
-
         //不是首页 / ，使用 page 模块去处理
         if (!"/".equals(JPressHandler.getCurrentTarget())) {
             forwardAction("/page");
