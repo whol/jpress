@@ -296,8 +296,8 @@ CREATE TABLE `single_page` (
   `view_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '访问量',
   `created` datetime DEFAULT NULL COMMENT '创建日期',
   `modified` datetime DEFAULT NULL COMMENT '最后更新日期',
-  `meta_keywords` varchar(256) DEFAULT NULL COMMENT 'SEO关键字',
-  `meta_description` varchar(256) DEFAULT NULL COMMENT 'SEO描述信息',
+  `meta_keywords` varchar(512) DEFAULT NULL COMMENT 'SEO关键字',
+  `meta_description` varchar(512) DEFAULT NULL COMMENT 'SEO描述信息',
   `remarks` text COMMENT '备注信息',
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`)
@@ -312,7 +312,7 @@ DROP TABLE IF EXISTS `user`;
 
 CREATE TABLE `user` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `username` varchar(128) DEFAULT NULL COMMENT '登陆名',
+  `username` varchar(128) DEFAULT NULL COMMENT '登录名',
   `nickname` varchar(128) DEFAULT NULL COMMENT '昵称',
   `realname` varchar(128) DEFAULT NULL COMMENT '实名',
   `identity` varchar(128) DEFAULT NULL COMMENT '身份',
@@ -343,7 +343,7 @@ CREATE TABLE `user` (
   `status` varchar(32) DEFAULT NULL COMMENT '状态',
   `created` datetime DEFAULT NULL COMMENT '创建日期',
   `create_source` varchar(128) DEFAULT NULL COMMENT '用户来源（可能来之oauth第三方）',
-  `logged` datetime DEFAULT NULL COMMENT '最后的登陆时间',
+  `logged` datetime DEFAULT NULL COMMENT '最后的登录时间',
   `activated` datetime DEFAULT NULL COMMENT '激活时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
@@ -437,3 +437,18 @@ CREATE TABLE `wechat_reply` (
   `modified` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户自定义关键字回复表';
+
+
+# init user info ,loginName:admin,loginPassword:123456
+
+INSERT INTO `user` (`id`, `username`, `nickname`, `realname`,  `password`, `salt`, `status`, `created`, `create_source`, `logged`, `activated`)
+VALUES (1, 'admin', 'admin', 'admin',  'f7ae4cc04143c9c02b686e24892fe2a577da53069ea09581912cab5eb63edf8a', '0JHM8eK6Rj7RVejdtcd_pmsiXzS_0hIw', 'ok', '2018-10-07 13:39:11', 'web_register', '2018-10-01 00:00:00', '2018-10-01 00:00:00');
+
+INSERT INTO `role` (`id`, `name`, `description`, `flag`, `created`, `modified`)
+VALUES (1, 'admin role', 'auto creat by system', 'jpsa', '2018-10-01 00:00:00', '2018-10-01 00:00:00');
+
+INSERT INTO `user_role_mapping` (`user_id`, `role_id`)
+VALUES (1, 1);
+
+
+

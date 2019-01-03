@@ -21,6 +21,7 @@ import com.jfinal.kit.Ret;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
 import io.jboot.db.JbootDbManager;
 import io.jboot.db.datasource.DataSourceConfig;
+import io.jboot.utils.ArrayUtils;
 import io.jboot.utils.StrUtils;
 import io.jboot.web.controller.JbootController;
 import io.jboot.web.controller.annotation.RequestMapping;
@@ -35,6 +36,7 @@ import io.jpress.service.UserService;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -76,7 +78,14 @@ public class InstallController extends JbootController {
     }
 
     public void step3() {
-        render("/WEB-INF/install/views/step3.html");
+
+        //已经安装过了
+        if (InstallUtils.isInitBefore()) {
+            render("/WEB-INF/install/views/step3_notinit.html");
+        } else {
+            render("/WEB-INF/install/views/step3.html");
+        }
+
     }
 
     public void error() {
@@ -112,28 +121,29 @@ public class InstallController extends JbootController {
         }
 
         try {
-
             InstallUtils.init(dbName, dbUser, dbPwd, dbHost, dbPort);
 
             List<String> tables = InstallUtils.getTableList();
-            if (tables.contains("user")
-                    || tables.contains("utm")
-                    || tables.contains("option")
-                    || tables.contains("menu")
-                    || tables.contains("role")
-                    || tables.contains("permission")
-                    ) {
-                renderJson(Ret.fail());
+
+            if (ArrayUtils.isNotEmpty(tables)
+                    && tables.contains("attachment")
+                    && tables.contains("option")
+                    && tables.contains("menu")
+                    && tables.contains("permission")
+                    && tables.contains("role")
+                    && tables.contains("user")
+                    && tables.contains("utm")) {
+
+                InstallUtils.setInitBefore(true);
+                renderJson(Ret.ok());
                 return;
             }
 
-            InstallUtils.initJPressTables();
-
-            DataSourceConfig config = InstallUtils.getDataSourceConfig();
-            config.setName(DataSourceConfig.NAME_DEFAULT);
-
-            ActiveRecordPlugin activeRecordPlugin = JbootDbManager.me().createRecordPlugin(config);
-            activeRecordPlugin.start();
+            if (ArrayUtils.isNotEmpty(tables)) {
+                renderJson(Ret.fail("message", "无法安装，该数据库已有表信息了，为了安全起见，请选择全新的数据库进行安装。")
+                        .set("errorCode", 5));
+                return;
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -147,13 +157,100 @@ public class InstallController extends JbootController {
 
     public void install() {
 
+        if (InstallUtils.isInitBefore()) {
+            doProcessInOldDb();
+        } else {
+            doProcessNormal();
+        }
+
+    }
+
+    private void doProcessInOldDb() {
+
         String username = getPara("username");
         String pwd = getPara("pwd");
         String confirmPwd = getPara("confirmPwd");
 
+        if (StrUtils.isNotBlank(username)) {
+
+            if (StrUtils.isBlank(pwd)) {
+                renderJson(Ret.fail().set("message", "密码不能为空").set("errorCode", 3));
+                return;
+            }
+
+            if (StrUtils.isBlank(confirmPwd)) {
+                renderJson(Ret.fail().set("message", "确认密码不能为空").set("errorCode", 4));
+                return;
+            }
+
+            if (pwd.equals(confirmPwd) == false) {
+                renderJson(Ret.fail().set("message", "两次输入密码不一致").set("errorCode", 5));
+                return;
+            }
+
+            initActiveRecordPlugin();
+
+            String salt = HashKit.generateSaltForSha256();
+            String hashedPass = HashKit.sha256(salt + pwd);
+
+            User user = userService.findById(1l);
+            if (user == null) user = new User();
+
+            user.setUsername(username);
+            user.setNickname(username);
+            user.setRealname(username);
+
+            user.setSalt(salt);
+            user.setPassword(hashedPass);
+            user.setCreated(new Date());
+            user.setActivated(new Date());
+            user.setStatus(User.STATUS_OK);
+            user.setCreateSource(User.SOURCE_WEB_REGISTER);
+
+            if (StrUtils.isEmail(username)) {
+                user.setEmail(username.toLowerCase());
+            }
+
+            userService.saveOrUpdate(user);
+
+        } else {
+            initActiveRecordPlugin();
+        }
+
+
+        if (doCreatedInstallLockFiles()) {
+            renderJson(Ret.ok());
+        } else {
+            renderJson(Ret.fail().set("message", "classes目录没有写入权限，请查看服务器配置是否正确。"));
+        }
+
+    }
+
+    private void doProcessNormal() {
+
         String webName = getPara("web_name");
         String webTitle = getPara("web_title");
         String webSubtitle = getPara("web_subtitle");
+
+        String username = getPara("username");
+        String pwd = getPara("pwd");
+        String confirmPwd = getPara("confirmPwd");
+
+
+        if (StrUtils.isBlank(webName)) {
+            renderJson(Ret.fail().set("message", "网站名称不能为空").set("errorCode", 10));
+            return;
+        }
+
+        if (StrUtils.isBlank(webTitle)) {
+            renderJson(Ret.fail().set("message", "网站标题不能为空").set("errorCode", 11));
+            return;
+        }
+
+        if (StrUtils.isBlank(webSubtitle)) {
+            renderJson(Ret.fail().set("message", "网站副标题不能为空").set("errorCode", 12));
+            return;
+        }
 
         if (StrUtils.isBlank(username)) {
             renderJson(Ret.fail().set("message", "账号不能为空").set("errorCode", 1));
@@ -175,26 +272,31 @@ public class InstallController extends JbootController {
             return;
         }
 
-        if (StrUtils.isBlank(webName)) {
-            renderJson(Ret.fail().set("message", "网站名称不能为空").set("errorCode", 10));
+        try {
+            InstallUtils.tryInitJPressTables();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            renderJson(Ret.fail());
             return;
         }
 
-        if (StrUtils.isBlank(webTitle)) {
-            renderJson(Ret.fail().set("message", "网站标题不能为空").set("errorCode", 11));
-            return;
-        }
+        initActiveRecordPlugin();
 
-        if (StrUtils.isBlank(webSubtitle)) {
-            renderJson(Ret.fail().set("message", "网站副标题不能为空").set("errorCode", 12));
-            return;
-        }
+        optionService.saveOrUpdate("web_name", webName);
+        optionService.saveOrUpdate("web_title", webTitle);
+        optionService.saveOrUpdate("web_subtitle", webSubtitle);
+
+        JPressOptions.set("web_name", webName);
+        JPressOptions.set("web_title", webTitle);
+        JPressOptions.set("web_subtitle", webSubtitle);
+
 
         String salt = HashKit.generateSaltForSha256();
         String hashedPass = HashKit.sha256(salt + pwd);
 
-        User user = new User();
-        user.setId(1l);
+        User user = userService.findById(1l);
+        if (user == null) user = new User();
+
         user.setUsername(username);
         user.setNickname(username);
         user.setRealname(username);
@@ -211,17 +313,30 @@ public class InstallController extends JbootController {
             user.setEmail(username.toLowerCase());
         }
 
-        userService.save(user);
+        userService.saveOrUpdate(user);
         roleService.initWebRole();
 
-        optionService.saveOrUpdate("web_name", webName);
-        optionService.saveOrUpdate("web_title", webTitle);
-        optionService.saveOrUpdate("web_subtitle", webSubtitle);
+        if (doCreatedInstallLockFiles()) {
+            renderJson(Ret.ok());
+        } else {
+            renderJson(Ret.fail().set("message", "classes目录没有写入权限，请查看服务器配置是否正确。"));
+        }
 
-        JPressOptions.set("web_name", webName);
-        JPressOptions.set("web_title", webTitle);
-        JPressOptions.set("web_subtitle", webSubtitle);
+    }
 
+
+    private void initActiveRecordPlugin() {
+
+
+        DataSourceConfig config = InstallUtils.getDataSourceConfig();
+        config.setName(DataSourceConfig.NAME_DEFAULT);
+
+        ActiveRecordPlugin activeRecordPlugin = JbootDbManager.me().createRecordPlugin(config);
+        activeRecordPlugin.start();
+    }
+
+
+    private boolean doCreatedInstallLockFiles() {
         try {
             File lockFile = InstallUtils.lockFile();
             lockFile.createNewFile();
@@ -230,15 +345,14 @@ public class InstallController extends JbootController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            renderJson(Ret.fail().set("message", "classes目录没有写入权限，请查看服务器配置是否正确。"));
-            return;
-        }
 
+            return false;
+        }
 
         JPressInstaller.setInstalled(true);
         JPressInstaller.notifyAllListeners();
 
-        renderJson(Ret.ok());
+        return true;
     }
 
 

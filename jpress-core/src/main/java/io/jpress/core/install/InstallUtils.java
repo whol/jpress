@@ -42,6 +42,8 @@ public class InstallUtils {
     private static String dbUser;
     private static String dbPassword;
 
+    private static boolean initBefore = false;
+
     private static DataSource dataSource;
     private static DataSourceConfig dataSourceConfig;
     private static String jdbcUrl;
@@ -132,32 +134,12 @@ public class InstallUtils {
     }
 
 
-    public static void initJPressTables() throws SQLException {
+    public static void tryInitJPressTables() throws SQLException {
         String SqlFilePath = PathKit.getWebRootPath() + "/WEB-INF/install/sqls/mysql.sql";
         String installSql = FileUtils.readString(new File(SqlFilePath));
         executeBatchSql(installSql);
     }
 
-
-    public static void executeSQL(String sql, Object... params) throws SQLException {
-        Connection conn = getConnection();
-        PreparedStatement pstmt = null;
-        try {
-            pstmt = conn.prepareStatement(sql);
-            if (null != params && params.length > 0) {
-                int i = 0;
-                for (Object param : params) {
-                    pstmt.setString(++i, param.toString());
-                }
-            }
-            pstmt.executeUpdate();
-
-        } catch (SQLException e) {
-            log.warn("InstallUtils executeSQL erro", e);
-        } finally {
-            close(pstmt, conn);
-        }
-    }
 
     private static void executeBatchSql(String batchSql) throws SQLException {
         Connection conn = getConnection();
@@ -181,6 +163,7 @@ public class InstallUtils {
             close(pst, conn);
         }
     }
+    
 
     private static <T> List<T> query(Connection conn, String sql) throws SQLException {
         List result = new ArrayList();
@@ -232,5 +215,13 @@ public class InstallUtils {
 
     public static DataSourceConfig getDataSourceConfig() {
         return dataSourceConfig;
+    }
+
+    public static void setInitBefore(boolean initBefore) {
+        InstallUtils.initBefore = initBefore;
+    }
+
+    public static boolean isInitBefore() {
+        return initBefore;
     }
 }
