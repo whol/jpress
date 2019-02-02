@@ -1,0 +1,108 @@
+#@layout()
+
+#define script()
+<script>
+
+
+</script>
+
+#end
+
+
+#define content()
+<div class="content-wrapper">
+
+    <section class="content-header">
+        <h1>
+            保险类型管理
+            <small>Insurance Type Management</small>
+        </h1>
+    </section>
+
+    <section class="content-header text-tap">
+        <a href="#(CPATH)/admin/insurance/insuranceType">全部 (#(totalCount ??))</a>
+    </section>
+
+    <section class="content">
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <form class="form-horizontal actionPanel" action="#(CPATH)/admin/insurance/insuranceType" method="get">
+                            <div class="row">
+                                <div class="form-group col-lg-4">
+                                    <label class="col-sm-3 control-label">类型名称</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" name="insuranceTypeName" value="#para('insuranceTypeName')">
+                                    </div>
+                                </div>
+                                <div class="form-group col-lg-8">
+                                    <div class="col-sm-12">
+                                        <button type="submit" class="btn btn-primary ">查询</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+                        </form>
+
+                        <div class="row actionPanel">
+                            <div class="col-xs-12">
+                                <a href="#(CPATH)/admin/insurance/typeWrite" class="btn btn-primary "> <i
+                                        class="fa fa-fw fa-plus"></i> 新建</a>
+                                <button type="button" id="batchDel" class="btn btn-default checkAction"> 批量删除</button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body ">
+
+                        <table class="table table-striped">
+                            <tbody>
+                            <tr>
+                                <th style="width: 10px">
+                                    <input name="dataItem" onchange="checkAll(this)" type="checkbox" value="0"/>
+                                </th>
+                                <th style="width: 450px">保险类型名称</th>
+                                <th>交费类型</th>
+                                <th>交费年限</th>
+                                <th style="width: 100px">备注</th>
+                            </tr>
+
+                            #for(sp : insuranceType.list)
+                            <tr class="jp-actiontr">
+                                <td><input class="dataItem" type="checkbox" value="#(sp.insuranceTypeId)" onchange="dataItemChange(this)"/>
+                                </td>
+                                <td>
+                                    <strong>
+                                        <a href="#(CPATH)/admin/insurance/write/#(sp.insuranceTypeId)">#(sp.insuranceTypeName ??)</a>
+                                    </strong>
+                                </td>
+                                <td>#(sp.paymentType ??)</td>
+                                <td>#(sp.paymentAge ??)</td>
+                                <td>#(sp.remark ??)</td>
+                            </tr>
+                            #end
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.box-body -->
+                    <div class="box-footer">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                #@_paginate()
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box -->
+            </div>
+        </div>
+
+    </section>
+
+
+</div>
+#end

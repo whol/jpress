@@ -13,30 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jpress.codegen;
+package io.jpress;
+
+import io.jpress.codegen.ModuleGenerator;
 
 /**
  * @author Michael Yang 杨福海 （fuhai999@gmail.com）
  * @version V1.0
  * @Package io.jboot.codegen
  */
-public class Tester {
+public class InsuranceModuleGenerator {
 
 
     private static String dbUrl = "jdbc:mysql://47.99.240.128:3306/newjpress";
     private static String dbUser = "jpress";
     private static String dbPassword = "jpress19851210";
 
-//    private static String moduleName = "article";
-//    private static String dbTables = "article,article_category,article_category_mapping,article_comment,article_pay_record";
-//    private static String modelPackage = "io.jpress.module.article.model";
-//    private static String servicePackage = "io.jpress.module.article.service";
 
-
-    private static String moduleName = "insuranceType";
-    private static String dbTables = "insuranceType";
-    private static String modelPackage = "io.jpress.module.page.model";
-    private static String servicePackage = "io.jpress.module.page.service";
+    private static String moduleName = "insurance";
+    private static String dbTables = "insurance_calc";
+    private static String modelPackage = "io.jpress.module.insurance.model";
+    private static String servicePackage = "io.jpress.module.insurance.service";
 
     public static void main(String[] args) {
 

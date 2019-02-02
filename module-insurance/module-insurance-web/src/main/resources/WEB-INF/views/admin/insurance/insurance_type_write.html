@@ -1,0 +1,120 @@
+#@layout()
+#define script()
+<script src="#(CPATH)/static/components/ckeditor/ckeditor.js"></script>
+<script src="#(CPATH)/static/components/editable/js/bootstrap-editable.min.js"></script>
+<script src="#(CPATH)/static/components/selectize/selectize.min.js"></script>
+<script src="#(CPATH)/static/components/highlight/highlight.pack.js"></script>
+<script src="#(CPATH)/static/components/simplemde/simplemde.min.js"></script>
+
+
+<script>
+
+    function doSubmit() {
+        ajaxSubmit("#form", function (data) {
+            $("#insuranceTypeId").attr("value", data.id);
+            toastr.success('内容保存成功。');
+        })
+    }
+
+    $("#submit").on("click", function () {
+        doSubmit("normal");
+    })
+
+
+
+</script>
+#end
+#define css()
+<link href="#(CPATH)/static/components/editable/css/bootstrap-editable.css" rel="stylesheet">
+<link href="#(CPATH)/static/components/selectize/css/selectize.css" rel="stylesheet">
+<link href="#(CPATH)/static/components/selectize/css/selectize.jpress.css" rel="stylesheet">
+<link href="#(CPATH)/static/components/highlight/styles/github.css" rel="stylesheet">
+<link href="#(CPATH)/static/components/simplemde/simplemde.min.css" rel="stylesheet">
+<link href="#(CPATH)/static/components/simplemde/simplemde.jpress.css" rel="stylesheet">
+
+<style>
+    .popover-content {
+        padding: 9px 14px;
+        margin: 0 10px;
+    }
+
+    #slug {
+        cursor: pointer;
+    }
+
+</style>
+#end
+
+#define content()
+<div class="content-wrapper">
+
+    <section class="content-header">
+        <h1>
+            写页面
+        </h1>
+    </section>
+
+    <section class="content">
+        <form action="#(CPATH)/admin/insurance/doTypeWriteSave" method="post" id="form">
+            <input type="hidden" id="insuranceTypeId" name="insuranceType.insuranceTypeId" value="#(insuranceType.insuranceTypeId ??)">
+            <div class="row">
+                <div class="col-lg-9">
+
+                    <!-- /.box-header -->
+                    <!-- form start -->
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <input type="input" class="form-control input-lg" name="insuranceType.insuranceTypeName"
+                                       placeholder="请输入名称"
+                                       id="insuranceTypeName"
+                                       value="#(insuranceType.insuranceTypeName ??)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <input type="input" class="form-control input-lg" name="insuranceType.paymentType"
+                                       placeholder="请输入交费类型"
+                                       id="paymentType"
+                                       value="#(insuranceType.paymentType ??)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <input type="input" class="form-control input-lg" name="insuranceType.paymentAge"
+                                       placeholder="请输入交费年限"
+                                       id="paymentAge"
+                                       value="#(insuranceType.paymentAge ??)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <input type="input" class="form-control input-lg" name="insuranceType.remark"
+                                       placeholder="请输入备注"
+                                       id="remark"
+                                       value="#(insuranceType.remark ??)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3">
+                    <div class="box box-solid">
+
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <div class="box-body ">
+                            <button type="button" id="submit" class="btn btn-primary btn-sm ">发布</button>
+                        </div>
+                    </div>
+
+
+                    <div class="box box-solid">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+
+</div>
+#end
