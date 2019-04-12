@@ -1,0 +1,14 @@
+<span class="label label-success">
+	<a href="/" class="label">#(WEB_NAME ??)</a>
+</span>
+&nbsp;>>
+<span class="label label-success">
+	#articleCategories(article.id,"category")
+		#for(category : categories)
+			<a href="#(category.url ??)" class="label">#(category.title ??)</a>
+			#if(!for.last) , #end#end#end
+</span>
+&nbsp;>>
+<span class="label label-success">
+	#(article.title ??)
+</span>
