@@ -245,7 +245,7 @@ body::-webkit-scrollbar-track {
 .tag{
 	height: 24px;
     line-height: 18px;
-    font-size: .6em;
+    font-size: 1em;
     padding: 3px 6px 3px 6px;
 	margin-left: 4px!important;
 	margin-top: 6px!important;
