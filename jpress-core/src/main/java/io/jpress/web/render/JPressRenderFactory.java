@@ -17,12 +17,9 @@ package io.jpress.web.render;
 
 import com.jfinal.render.Render;
 import io.jboot.utils.RequestUtil;
-import io.jboot.web.controller.JbootControllerContext;
 import io.jboot.web.render.JbootRenderFactory;
-import io.jpress.core.install.Installer;
 import io.jpress.core.template.Template;
 import io.jpress.core.template.TemplateManager;
-import io.jpress.web.base.TemplateControllerBase;
 import io.jpress.web.handler.JPressHandler;
 
 /**
@@ -35,18 +32,17 @@ public class JPressRenderFactory extends JbootRenderFactory {
     @Override
     public Render getErrorRender(int errorCode) {
 
-        if (JbootControllerContext.get() instanceof TemplateControllerBase) {
-            return getTemplateRender(errorCode);
+        if (JPressHandler.getCurrentTarget().startsWith("/admin/")) {
+            if (errorCode == 404) {
+                return getErrorRender(errorCode, "/WEB-INF/views/admin/error/404.html");
+            } else {
+                return getErrorRender(errorCode, "/WEB-INF/views/admin/error/500.html");
+            }
         }
 
-        if (JPressHandler.getCurrentTarget().startsWith("/install")
-                && Installer.isInstalled()) {
-            return getTemplateRender(errorCode);
-        }
-
-        return super.getErrorRender(errorCode);
-
+        return getTemplateRender(errorCode);
     }
+
 
     private Render getTemplateRender(int errorCode) {
         Template template = TemplateManager.me().getCurrentTemplate();
@@ -55,13 +51,13 @@ public class JPressRenderFactory extends JbootRenderFactory {
         }
 
         String view = template.matchTemplateFile("error_" + errorCode + ".html",
-                RequestUtil.isMobileBrowser(JbootControllerContext.get().getRequest()));
+                RequestUtil.isMobileBrowser(JPressHandler.getCurrentRequest()));
         if (view == null) {
             return super.getErrorRender(errorCode);
         }
 
         view = "/templates/" + template.getFolder() + "/" + view;
-        return new TemplateRender(view);
+        return new TemplateRender(view,errorCode);
     }
 
 

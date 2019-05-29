@@ -1,0 +1,8 @@
+FROM openjdk:8-jdk-alpine
+LABEL maintainer="Michael Yang<fuhai999@gmail.com>"
+
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
+    echo ${TZ} > /etc/timezone
+
+RUN apk add --no-cache curl tar bash procps font-adobe-100dpi ttf-dejavu

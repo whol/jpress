@@ -21,9 +21,10 @@ import com.jfinal.kit.Ret;
 import io.jboot.utils.CookieUtil;
 import io.jboot.utils.StrUtil;
 import io.jboot.web.controller.annotation.RequestMapping;
+import io.jboot.web.validate.CaptchaValidate;
 import io.jboot.web.validate.EmptyValidate;
 import io.jboot.web.validate.Form;
-import io.jpress.JPressApplicationConfig;
+import io.jpress.JPressConfig;
 import io.jpress.JPressConsts;
 import io.jpress.core.module.ModuleListener;
 import io.jpress.core.module.ModuleManager;
@@ -52,18 +53,15 @@ public class _AdminController extends AdminControllerBase {
     @Inject
     private RoleService roleService;
 
-    @Inject
-    private JPressApplicationConfig config;
-
     @Clear
     public void login() {
 
-        if (!JPressHandler.getCurrentTarget().equals(config.getAdminLoginPage())) {
+        if (!JPressHandler.getCurrentTarget().equals(JPressConfig.me.getAdminLoginPage())) {
             renderError(404);
             return;
         }
 
-        setAttr("action", config.getAdminLoginAction());
+        setAttr("action", JPressConfig.me.getAdminLoginAction());
         render("login.html");
     }
 
@@ -71,11 +69,13 @@ public class _AdminController extends AdminControllerBase {
     @Clear
     @EmptyValidate({
             @Form(name = "user", message = "账号不能为空"),
-            @Form(name = "pwd", message = "密码不能为空")
+            @Form(name = "pwd", message = "密码不能为空"),
+            @Form(name = "captcha", message = "验证码不能为空"),
     })
+    @CaptchaValidate(form = "captcha",message = "验证码不正确，请重新输入")
     public void doLogin(String user, String pwd) {
 
-        if (!JPressHandler.getCurrentTarget().equals(config.getAdminLoginAction())) {
+        if (!JPressHandler.getCurrentTarget().equals(JPressConfig.me.getAdminLoginAction())) {
             renderError(404);
             return;
         }
