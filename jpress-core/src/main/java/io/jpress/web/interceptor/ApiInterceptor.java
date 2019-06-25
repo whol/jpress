@@ -76,6 +76,7 @@ public class ApiInterceptor implements Interceptor, JPressOptions.OptionChangeLi
             return;
         }
 
+
         JbootController controller = (JbootController) inv.getController();
         String appId = controller.getPara("appId");
         if (StrUtil.isBlank(appId)) {
@@ -152,7 +153,7 @@ public class ApiInterceptor implements Interceptor, JPressOptions.OptionChangeLi
 
         switch (key) {
             case JPressConsts.OPTION_API_ENABLE:
-                apiEnable = Boolean.parseBoolean(newValue);
+                apiEnable = JPressOptions.getAsBool(JPressConsts.OPTION_API_ENABLE);
                 break;
             case JPressConsts.OPTION_API_APPID:
                 apiAppId = newValue;

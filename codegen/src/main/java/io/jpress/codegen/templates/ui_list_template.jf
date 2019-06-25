@@ -56,13 +56,13 @@
 	                                    <input name="dataItem" onchange="checkAll(this)" type="checkbox"/>
 	                                </th>
                                 #for(cm : tableMeta.columnMetas)
-	                                <th>#(cm.remarks)</th>
+	                                <th>#(cm.remarks?? "列名称")</th>
                                 #end
                                 
                             </tr>
                             #('#')for(entry : page.list)
                             <tr class="jp-actiontr">
-                                <td><input class="dataItem" type="checkbox" value="#('#')(entry.id)" onchange="dataItemChange(this)"/>
+                                <td><input class="dataItem" type="checkbox" value="#('#')(entry.id)" />
                                 </td>
                                 <td>
                                     <strong>
